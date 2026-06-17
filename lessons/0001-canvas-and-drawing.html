@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1: Canvas &amp; Drawing</title>
+<style>
+  :root {
+    --bg: #fdf6e3;
+    --text: #586e75;
+    --heading: #2aa198;
+    --code-bg: #eee8d5;
+    --accent: #268bd2;
+    --border: #d3cbb8;
+    --danger: #dc322f;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Palatino", "Georgia", "Times New Roman", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    max-width: 760px;
+    margin: 3rem auto;
+    padding: 0 1.25rem;
+  }
+  h1 { color: var(--heading); font-size: 2rem; margin-bottom: 0.25rem; }
+  h2 { color: var(--heading); font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+  p { margin-bottom: 0.9rem; }
+  .subtitle { color: var(--text); opacity: 0.6; font-size: 0.95rem; margin-bottom: 2rem; }
+  code {
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 1rem 1.2rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+    font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .callout {
+    background: #e8f4f0;
+    border-left: 4px solid var(--heading);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.2rem;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout strong { color: var(--heading); }
+  .quiz {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin: 1.5rem 0;
+  }
+  .quiz h3 { color: var(--accent); margin-bottom: 0.6rem; }
+  .quiz label {
+    display: block;
+    cursor: pointer;
+    padding: 0.45rem 0.8rem;
+    margin: 0.2rem 0;
+    border-radius: 4px;
+    border: 1px solid transparent;
+  }
+  .quiz label:hover { background: var(--code-bg); }
+  .quiz input[type="radio"] { margin-right: 0.5rem; }
+  .quiz .correct {
+    background: #e6f7e6 !important;
+    border-color: #4caf50 !important;
+  }
+  .quiz .wrong {
+    background: #fde8e8 !important;
+    border-color: var(--danger) !important;
+  }
+  .quiz .feedback { margin-top: 0.7rem; font-style: italic; }
+  .sandbox {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow: hidden;
+  }
+  .sandbox-header {
+    background: var(--code-bg);
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border);
+  }
+  .sandbox textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border: none;
+    font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+    font-size: 0.85rem;
+    resize: vertical;
+  }
+  .sandbox canvas {
+    display: block;
+    border-top: 1px solid var(--border);
+  }
+  .sandbox button {
+    display: block;
+    width: 100%;
+    padding: 0.65rem;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .sandbox button:hover { opacity: 0.9; }
+  .sandbox button:active { opacity: 0.8; }
+  .try {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin: 1.5rem 0;
+    border: 1px dashed var(--border);
+  }
+  .try h3 { color: var(--heading); margin-bottom: 0.5rem; }
+  .try ul { margin-left: 1.2rem; }
+  .try li { margin-bottom: 0.4rem; }
+  nav { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  nav a { color: var(--accent); }
+  .warning {
+    background: #fdf0e0;
+    border-left: 4px solid #b58900;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.2rem;
+    border-radius: 0 6px 6px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Lesson 1: The Canvas &amp; Drawing</h1>
+<p class="subtitle">The first thing every game needs: something on the screen.</p>
+
+<h2>Three ingredients of a browser game</h2>
+<p>
+  Every page you see in a browser is made of three technologies:
+</p>
+<p>
+  <strong>HTML</strong> -- the skeleton. It declares <em>what</em> is on the page:
+  text, images, buttons, and a special element for drawing called <code>&lt;canvas&gt;</code>.
+</p>
+<p>
+  <strong>CSS</strong> -- the skin. It controls <em>how</em> things look: colors, sizes, positions.
+</p>
+<p>
+  <strong>JavaScript</strong> -- the brain. It makes things <em>happen</em>:
+  movement, clicks, game logic. It's a real programming language.
+</p>
+
+<div class="callout">
+  <strong>A game is just a web page that redraws itself 60 times per second.</strong>
+  The <code>&lt;canvas&gt;</code> element is our playground. JavaScript paints onto it
+  faster than the eye can see, and that creates the illusion of movement.
+</div>
+
+<h2>The <code>&lt;canvas&gt;</code> element</h2>
+<p>
+  The canvas is an invisible grid of pixels. You tell JavaScript: "fill a rectangle at
+  position (50, 100) with yellow" and it appears. Everything in our game will be drawn
+  on this canvas.
+</p>
+
+<p>Here's the smallest possible canvas you can create:</p>
+
+<pre>&lt;canvas id="game" width="400" height="600"&gt;&lt;/canvas&gt;</pre>
+
+<p>
+  <code>id="game"</code> gives it a name so JavaScript can find it.
+  <code>width</code> and <code>height</code> set the pixel dimensions.
+</p>
+
+<p>And here's the JavaScript to draw a filled rectangle on it:</p>
+
+<pre>const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+ctx.fillStyle = '#f1c40f';
+ctx.fillRect(180, 280, 40, 40);</pre>
+
+<p>Let's unpack each line:</p>
+<ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+  <li><code>const canvas = ...</code> -- grab the canvas element by its id</li>
+  <li><code>const ctx = ...</code> -- get the "2D drawing context," our paintbrush</li>
+  <li><code>ctx.fillStyle = ...</code> -- set the paint color (a hex code for gold/yellow)</li>
+  <li><code>ctx.fillRect(x, y, width, height)</code> -- paint a filled rectangle</li>
+</ul>
+
+<h2>Coordinate system</h2>
+<p>
+  The canvas uses a coordinate system where <strong>(0, 0) is the top-left corner</strong>.
+  X increases to the right, Y increases downward. This is different from math class!
+</p>
+
+<div class="sandbox">
+  <div class="sandbox-header">Live sandbox -- try changing the numbers and click "Run"</div>
+  <textarea id="sandbox-code">const canvas = document.getElementById('sandbox-canvas');
+const ctx = canvas.getContext('2d');
+
+// Background
+ctx.fillStyle = '#a8d8ea';
+ctx.fillRect(0, 0, 400, 400);
+
+// Ground
+ctx.fillStyle = '#8d6e63';
+ctx.fillRect(0, 350, 400, 50);
+
+// The bird (a rectangle for now)
+ctx.fillStyle = '#f1c40f';
+ctx.fillRect(180, 280, 40, 40);
+
+// An eye
+ctx.fillStyle = 'black';
+ctx.fillRect(205, 290, 8, 8);</textarea>
+  <button id="sandbox-run">Run</button>
+  <canvas id="sandbox-canvas" width="400" height="400"></canvas>
+</div>
+
+<script>
+(function() {
+  const textarea = document.getElementById('sandbox-code');
+  const button = document.getElementById('sandbox-run');
+
+  function run() {
+    try {
+      eval(textarea.value);
+    } catch(e) {
+      // silently ignore errors in sandbox
+    }
+  }
+
+  button.addEventListener('click', run);
+  run(); // run once on page load
+})();
+</script>
+
+<h2>Quiz: Check your understanding</h2>
+
+<div class="quiz" id="quiz1">
+  <h3>Q1: What does <code>ctx.fillRect(0, 0, 100, 50)</code> draw?</h3>
+  <label><input type="radio" name="q1" value="a" onchange="checkQ1()">
+    A rectangle 100 pixels wide and 50 tall, starting at the top-left corner
+  </label>
+  <label><input type="radio" name="q1" value="b" onchange="checkQ1()">
+    A circle with radius 100, filled with color
+  </label>
+  <label><input type="radio" name="q1" value="c" onchange="checkQ1()">
+    A rectangle 50 pixels wide and 100 tall, starting at the top-left corner
+  </label>
+  <p class="feedback" id="q1-feedback"></p>
+</div>
+
+<div class="quiz" id="quiz2">
+  <h3>Q2: Which pair does exactly the same thing?</h3>
+  <label><input type="radio" name="q2" value="a" onchange="checkQ2()">
+    <code>const x = 5</code> and <code>let x = 5</code>
+  </label>
+  <label><input type="radio" name="q2" value="b" onchange="checkQ2()">
+    <code>const x = 5</code> and <code>var x = 5</code>
+  </label>
+  <label><input type="radio" name="q2" value="c" onchange="checkQ2()">
+    <code>const x = 5</code> and <code>canvas.getContext('2d')</code>
+  </label>
+  <p class="feedback" id="q2-feedback"></p>
+</div>
+
+<div class="quiz" id="quiz3">
+  <h3>Q3: If I change the bird's Y from 280 to 100, what happens?</h3>
+  <label><input type="radio" name="q3" value="a" onchange="checkQ3()">
+    The bird moves right
+  </label>
+  <label><input type="radio" name="q3" value="b" onchange="checkQ3()">
+    The bird moves upward (toward the top)
+  </label>
+  <label><input type="radio" name="q3" value="c" onchange="checkQ3()">
+    The bird turns blue
+  </label>
+  <p class="feedback" id="q3-feedback"></p>
+</div>
+
+<script>
+function highlight(q, correctValue) {
+  const name = q.id.replace('quiz', 'q');
+  const labels = q.querySelectorAll('label');
+  let answered = false;
+  labels.forEach(l => {
+    const input = l.querySelector('input');
+    if (input && input.checked && input.value !== '') {
+      answered = true;
+    }
+  });
+  if (!answered) return;
+
+  labels.forEach(l => {
+    l.classList.remove('correct', 'wrong');
+    const input = l.querySelector('input');
+    if (input && input.checked) {
+      if (input.value === correctValue) {
+        l.classList.add('correct');
+      } else {
+        l.classList.add('wrong');
+      }
+    }
+  });
+  const fb = document.getElementById(name + '-feedback');
+  const checked = q.querySelector('input:checked');
+  if (checked) {
+    fb.textContent = checked.value === correctValue
+      ? 'Correct! You\'ve got this.'
+      : 'Not quite. Re-read the section above and try again.';
+  }
+}
+
+function checkQ1() { highlight(document.getElementById('quiz1'), 'a'); }
+function checkQ2() { highlight(document.getElementById('quiz2'), 'a'); }
+function checkQ3() { highlight(document.getElementById('quiz3'), 'b'); }
+</script>
+
+<div class="try">
+  <h3>Try it yourself</h3>
+  <p>Edit the sandbox code above and make these changes:</p>
+  <ul>
+    <li>Change the bird's fill color to red (<code>#e74c3c</code>)</li>
+    <li>Move the bird to the far right side of the canvas</li>
+    <li>Add a second eye next to the first one</li>
+    <li>Try <code>ctx.fillRect(0, 0, 200, 200)</code> -- what happens? (Hint: it paints over the background)</li>
+  </ul>
+</div>
+
+<div class="warning">
+  <strong>Common mistake:</strong> Forgetting to run <code>fillRect</code> <em>after</em>
+  setting <code>fillStyle</code>. The color applies to everything drawn after the assignment,
+  not before. Think of it like dipping your brush -- you dip, then you paint.
+</div>
+
+<h2>Key takeaways</h2>
+<ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+  <li>HTML gives you the <code>&lt;canvas&gt;</code>. JS paints on it.</li>
+  <li><code>getContext('2d')</code> is your paintbrush.</li>
+  <li>Coordinates start at the top-left: (0,0). Y goes down.</li>
+  <li><code>fillRect(x, y, w, h)</code> draws a filled rectangle.</li>
+  <li>Drawing order matters -- later rectangles paint on top of earlier ones.</li>
+</ul>
+
+<h2>Further reading</h2>
+<p>
+  Read <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_usage" target="_blank">MDN: Basic usage of Canvas</a>
+  -- the first section covers exactly what we did here.
+</p>
+
+<nav>
+  <a href="./0002-the-game-loop.html">Next lesson: The Game Loop →</a>
+</nav>
+
+<p style="margin-top: 2rem; font-size: 0.85rem; opacity: 0.6;">
+  Got questions? Ask me anything that wasn't clear -- I'm your teacher.
+</p>
+
+</body>
+</html>
