@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 4: Pipes &amp; Scrolling</title>
+<style>
+  :root {
+    --bg: #fdf6e3;
+    --text: #586e75;
+    --heading: #2aa198;
+    --code-bg: #eee8d5;
+    --accent: #268bd2;
+    --border: #d3cbb8;
+    --danger: #dc322f;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Palatino", "Georgia", "Times New Roman", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    max-width: 760px;
+    margin: 3rem auto;
+    padding: 0 1.25rem;
+  }
+  h1 { color: var(--heading); font-size: 2rem; margin-bottom: 0.25rem; }
+  h2 { color: var(--heading); font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+  p { margin-bottom: 0.9rem; }
+  .subtitle { color: var(--text); opacity: 0.6; font-size: 0.95rem; margin-bottom: 2rem; }
+  code {
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 1rem 1.2rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+    font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .callout {
+    background: #e8f4f0;
+    border-left: 4px solid var(--heading);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.2rem;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout strong { color: var(--heading); }
+  .quiz {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin: 1.5rem 0;
+  }
+  .quiz h3 { color: var(--accent); margin-bottom: 0.6rem; }
+  .quiz label {
+    display: block;
+    cursor: pointer;
+    padding: 0.45rem 0.8rem;
+    margin: 0.2rem 0;
+    border-radius: 4px;
+    border: 1px solid transparent;
+  }
+  .quiz label:hover { background: var(--code-bg); }
+  .quiz input[type="radio"] { margin-right: 0.5rem; }
+  .quiz .correct {
+    background: #e6f7e6 !important;
+    border-color: #4caf50 !important;
+  }
+  .quiz .wrong {
+    background: #fde8e8 !important;
+    border-color: var(--danger) !important;
+  }
+  .quiz .feedback { margin-top: 0.7rem; font-style: italic; }
+  .sandbox {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow: hidden;
+  }
+  .sandbox-header {
+    background: var(--code-bg);
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border);
+  }
+  .sandbox canvas {
+    display: block;
+    border-bottom: 1px solid var(--border);
+  }
+  .sandbox .arrow-hint {
+    text-align: center;
+    padding: 0.3rem;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    border-top: 1px solid #eee;
+  }
+  .try {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin: 1.5rem 0;
+    border: 1px dashed var(--border);
+  }
+  .try h3 { color: var(--heading); margin-bottom: 0.5rem; }
+  .try ul { margin-left: 1.2rem; }
+  .try li { margin-bottom: 0.4rem; }
+  nav { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  nav a { color: var(--accent); }
+  .warning {
+    background: #fdf0e0;
+    border-left: 4px solid #b58900;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.2rem;
+    border-radius: 0 6px 6px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Lesson 4: Pipes &amp; Scrolling</h1>
+<p class="subtitle">Making obstacles that scroll from right to left.</p>
+
+<h2>New concept: Arrays and Objects</h2>
+<p>
+  So far we've used simple variables: one birdY, one birdVelocity. But pipes are different --
+  there will be <em>many</em> of them on screen at once, and each one needs its own x-position
+  and gap position. We need two new tools:
+</p>
+
+<p>
+  An <strong>object</strong> groups related values together. Think of it as a labeled box:
+</p>
+<pre>const pipe = { x: 400, gapY: 200 };</pre>
+<p>
+  <code>pipe.x</code> gives 400. <code>pipe.gapY</code> gives 200.
+</p>
+
+<p>
+  An <strong>array</strong> is an ordered list. We'll keep all our pipes in an array:
+</p>
+<pre>const pipes = [];                          // empty list
+pipes.push({ x: 400, gapY: 180 });        // add a pipe to the list
+pipes.push({ x: 550, gapY: 250 });        // add another
+// pipes is now: [{x:400, gapY:180}, {x:550, gapY:250}]</pre>
+
+<div class="callout">
+  <strong><code>push()</code> adds to the end, <code>splice()</code> removes.</strong>
+  When a pipe scrolls off the left edge, we remove it from the array.
+  When we need a new pipe, we push it.
+</div>
+
+<h2>The pipe lifecycle</h2>
+
+<div style="display: flex; gap: 1rem; margin: 1rem 0; font-size: 0.95rem;">
+  <div style="flex: 1; background: white; border: 1px solid var(--border); border-radius: 8px; padding: 1rem;">
+    <strong style="color: var(--heading);">Spawn</strong>
+    <p style="margin: 0.3rem 0 0;">At the right edge: <code>x = canvas.width</code>. Random gap position.</p>
+  </div>
+  <div style="flex: 1; background: white; border: 1px solid var(--border); border-radius: 8px; padding: 1rem;">
+    <strong style="color: var(--heading);">Scroll</strong>
+    <p style="margin: 0.3rem 0 0;">Each frame: <code>pipe.x -= 2</code>. Moves left.</p>
+  </div>
+  <div style="flex: 1; background: white; border: 1px solid var(--border); border-radius: 8px; padding: 1rem;">
+    <strong style="color: var(--heading);">Remove</strong>
+    <p style="margin: 0.3rem 0 0;">When <code>x &lt; -pipeWidth</code>: splice it out.</p>
+  </div>
+</div>
+
+<h2>Drawing a pipe pair</h2>
+<p>
+  Each pipe is actually <em>two</em> rectangles: one above the gap and one below.
+  Here's how we draw one pipe object:
+</p>
+
+<pre>const pipeWidth = 60;
+const gapSize = 140;
+const groundY = canvas.height - 40;
+
+function drawPipe(pipe) {
+  ctx.fillStyle = '#27ae60';
+
+  // Top pipe: from the top of the canvas down to the gap
+  ctx.fillRect(pipe.x, 0, pipeWidth, pipe.gapY);
+
+  // Bottom pipe: from the gap bottom down to the ground
+  const bottomPipeTop = pipe.gapY + gapSize;
+  ctx.fillRect(pipe.x, bottomPipeTop, pipeWidth, groundY - bottomPipeTop);
+}</pre>
+
+<h2>The full code so far</h2>
+<pre>const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const groundY = canvas.height - 40;
+const pipeWidth = 60;
+const gapSize = 140;
+const pipeSpeed = 2;
+const spawnInterval = 120;  // frames between new pipes
+
+let birdY = 250;
+let birdVelocity = 0;
+const gravity = 0.4;
+const flapStrength = -7;
+let pipes = [];
+let frameCount = 0;
+
+function spawnPipe() {
+  const minGap = 50;
+  const maxGap = groundY - gapSize - 50;
+  const gapY = minGap + Math.random() * (maxGap - minGap);
+  pipes.push({ x: canvas.width, gapY: gapY });
+}
+
+function update() {
+  birdVelocity += gravity;
+  birdY += birdVelocity;
+  frameCount++;
+
+  // Move pipes left
+  for (const pipe of pipes) {
+    pipe.x -= pipeSpeed;
+  }
+
+  // Remove off-screen pipes
+  pipes = pipes.filter(pipe => pipe.x > -pipeWidth);
+
+  // Spawn new pipes
+  if (frameCount % spawnInterval === 0) {
+    spawnPipe();
+  }
+
+  requestAnimationFrame(update);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Sky
+  ctx.fillStyle = '#a8d8ea';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Pipes
+  for (const pipe of pipes) {
+    ctx.fillStyle = '#27ae60';
+    ctx.fillRect(pipe.x, 0, pipeWidth, pipe.gapY);
+    ctx.fillRect(pipe.x, pipe.gapY + gapSize, pipeWidth, groundY - pipe.gapY - gapSize);
+  }
+
+  // Ground
+  ctx.fillStyle = '#8d6e63';
+  ctx.fillRect(0, groundY, canvas.width, 40);
+
+  // Bird
+  ctx.fillStyle = '#f1c40f';
+  ctx.fillRect(180, birdY, 40, 40);
+
+  requestAnimationFrame(draw);
+}</pre>
+
+<div class="warning">
+  <strong>New syntax alert:</strong> <code>for (const pipe of pipes)</code> loops through every pipe in the array.
+  <code>pipes.filter(pipe => pipe.x > -pipeWidth)</code> creates a new array keeping only pipes that are still on screen.
+  Both are standard JavaScript patterns -- you'll use them constantly.
+</div>
+
+<h2>Live sandbox: play with scrolling pipes</h2>
+
+<div class="sandbox">
+  <div class="sandbox-header">Press SPACE to flap. Avoid the green pipes.</div>
+  <canvas id="sandbox-canvas" width="400" height="500"></canvas>
+  <div class="arrow-hint">↑ press SPACE to flap ↑</div>
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('sandbox-canvas');
+  const ctx = canvas.getContext('2d');
+  const groundY = canvas.height - 40;
+  const pipeWidth = 60;
+  const gapSize = 140;
+  const pipeSpeed = 2;
+  const spawnInterval = 120;
+
+  let birdY = 250;
+  let birdVelocity = 0;
+  const gravity = 0.4;
+  const flapStrength = -7;
+  let pipes = [];
+  let frameCount = 0;
+  let gameOver = false;
+
+  function spawnPipe() {
+    const minGap = 50;
+    const maxGap = groundY - gapSize - 50;
+    const gapY = minGap + Math.random() * (maxGap - minGap);
+    pipes.push({ x: canvas.width, gapY: gapY });
+  }
+
+  function update() {
+    if (gameOver) return;
+    birdVelocity += gravity;
+    birdY += birdVelocity;
+    frameCount++;
+
+    for (const pipe of pipes) {
+      pipe.x -= pipeSpeed;
+    }
+    pipes = pipes.filter(pipe => pipe.x > -pipeWidth);
+    if (frameCount % spawnInterval === 0) {
+      spawnPipe();
+    }
+
+    if (birdY <= 0) { birdY = 0; birdVelocity = 0; }
+    if (birdY >= groundY - 40) { birdY = groundY - 40; gameOver = true; }
+
+    requestAnimationFrame(update);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#a8d8ea';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (const pipe of pipes) {
+      ctx.fillStyle = '#27ae60';
+      ctx.fillRect(pipe.x, 0, pipeWidth, pipe.gapY);
+      ctx.fillRect(pipe.x, pipe.gapY + gapSize, pipeWidth, groundY - pipe.gapY - gapSize);
+    }
+
+    ctx.fillStyle = '#8d6e63';
+    ctx.fillRect(0, groundY, canvas.width, 40);
+
+    ctx.fillStyle = '#f1c40f';
+    ctx.fillRect(180, birdY, 40, 40);
+    ctx.fillStyle = 'black';
+    ctx.fillRect(205, birdY + 10, 8, 8);
+
+    if (gameOver) {
+      ctx.fillStyle = 'red';
+      ctx.font = '30px "Palatino", "Georgia", serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+    }
+
+    if (!gameOver) requestAnimationFrame(draw);
+  }
+
+  canvas.tabIndex = 0;
+  canvas.focus();
+
+  function restart() {
+    birdY = 250;
+    birdVelocity = 0;
+    pipes = [];
+    frameCount = 0;
+    gameOver = false;
+    update();
+    draw();
+  }
+
+  canvas.addEventListener('keydown', function(event) {
+    if (event.code === 'Space') {
+      event.preventDefault();
+      if (gameOver) { restart(); } else { birdVelocity = flapStrength; }
+    }
+  });
+
+  canvas.addEventListener('click', function() {
+    canvas.focus();
+    if (gameOver) restart();
+  });
+
+  restart();
+})();
+</script>
+
+<h2>Quiz</h2>
+
+<div class="quiz" id="quiz1">
+  <h3>Q1: What does <code>pipes.push({ x: 400, gapY: 200 })</code> do?</h3>
+  <label><input type="radio" name="q1" value="a" onchange="checkQ1()">
+    Creates a new pipe object and adds it to the end of the pipes array
+  </label>
+  <label><input type="radio" name="q1" value="b" onchange="checkQ1()">
+    Removes the pipe at position x=400 from the array
+  </label>
+  <label><input type="radio" name="q1" value="c" onchange="checkQ1()">
+    Draws a pipe onto the canvas immediately
+  </label>
+  <p class="feedback" id="q1-feedback"></p>
+</div>
+
+<div class="quiz" id="quiz2">
+  <h3>Q2: Why remove pipes that are off-screen (<code>pipe.x &lt; -pipeWidth</code>)?</h3>
+  <label><input type="radio" name="q2" value="a" onchange="checkQ2()">
+    They're invisible anyway -- no need to waste time updating or drawing them
+  </label>
+  <label><input type="radio" name="q2" value="b" onchange="checkQ2()">
+    Off-screen pipes cause the game to crash
+  </label>
+  <label><input type="radio" name="q2" value="c" onchange="checkQ2()">
+    They don't need to be removed; it's just cleaner code
+  </label>
+  <p class="feedback" id="q2-feedback"></p>
+</div>
+
+<div class="quiz" id="quiz3">
+  <h3>Q3: If I change <code>pipeSpeed</code> from 2 to 5, what happens?</h3>
+  <label><input type="radio" name="q3" value="a" onchange="checkQ3()">
+    Pipes move right instead of left
+  </label>
+  <label><input type="radio" name="q3" value="b" onchange="checkQ3()">
+    Pipes scroll faster, making the game harder
+  </label>
+  <label><input type="radio" name="q3" value="c" onchange="checkQ3()">
+    Nothing -- speed only affects the bird
+  </label>
+  <p class="feedback" id="q3-feedback"></p>
+</div>
+
+<script>
+function highlight(q, correctValue) {
+  const name = q.id.replace('quiz', 'q');
+  const labels = q.querySelectorAll('label');
+  let answered = false;
+  labels.forEach(l => {
+    const input = l.querySelector('input');
+    if (input && input.checked && input.value !== '') answered = true;
+  });
+  if (!answered) return;
+
+  labels.forEach(l => {
+    l.classList.remove('correct', 'wrong');
+    const input = l.querySelector('input');
+    if (input && input.checked) {
+      if (input.value === correctValue) {
+        l.classList.add('correct');
+      } else {
+        l.classList.add('wrong');
+      }
+    }
+  });
+  const fb = document.getElementById(name + '-feedback');
+  const checked = q.querySelector('input:checked');
+  if (checked) {
+    fb.textContent = checked.value === correctValue
+      ? 'Correct!'
+      : 'Not quite. Re-read the section above and try again.';
+  }
+}
+
+function checkQ1() { highlight(document.getElementById('quiz1'), 'a'); }
+function checkQ2() { highlight(document.getElementById('quiz2'), 'a'); }
+function checkQ3() { highlight(document.getElementById('quiz3'), 'b'); }
+</script>
+
+<div class="try">
+  <h3>Try it yourself</h3>
+  <ul>
+    <li>Change <code>gapSize</code> from 140 to 90 -- the gaps are tiny and the game gets much harder</li>
+    <li>Change <code>spawnInterval</code> from 120 to 60 -- pipes come twice as fast</li>
+    <li>Change the pipe color from <code>'#27ae60'</code> to <code>'#e74c3c'</code> (red pipes!)</li>
+    <li>Open the console and type <code>pipes.length</code> while playing to see how many pipes are active</li>
+  </ul>
+</div>
+
+<h2>Key takeaways</h2>
+<ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+  <li><strong>Objects</strong> <code>{ x: 400, gapY: 200 }</code> group related data together</li>
+  <li><strong>Arrays</strong> <code>[...]</code> hold lists of things -- perfect for multiple pipes</li>
+  <li><code>push()</code> adds to an array, <code>splice()</code>/<code>filter()</code> removes</li>
+  <li><code>Math.random()</code> generates a random number between 0 and 1 for varied gap positions</li>
+  <li><code>for (const pipe of pipes)</code> loops through every pipe to update or draw it</li>
+  <li>The game now looks nearly complete -- just missing collision detection and scoring</li>
+</ul>
+
+<h2>Further reading</h2>
+<p>
+  <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">MDN: Array</a>
+  and
+  <a href="https://eloquentjavascript.net/04_data.html" target="_blank">Eloquent JavaScript Chapter 4: Data Structures (Objects and Arrays)</a>.
+</p>
+
+<nav>
+  <a href="./0003-user-input.html">← Lesson 3: User Input &amp; Flapping</a>
+  &nbsp;|&nbsp;
+  <a href="./0005-collision-and-score.html">Next lesson: Collision &amp; Score →</a>
+</nav>
+
+<p style="margin-top: 2rem; font-size: 0.85rem; opacity: 0.6;">
+  Got questions? Ask me anything that wasn't clear -- I'm your teacher.
+</p>
+
+</body>
+</html>
