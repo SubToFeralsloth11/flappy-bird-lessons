@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 3: User Input &amp; Flapping</title>
+<style>
+  :root {
+    --bg: #fdf6e3;
+    --text: #586e75;
+    --heading: #2aa198;
+    --code-bg: #eee8d5;
+    --accent: #268bd2;
+    --border: #d3cbb8;
+    --danger: #dc322f;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Palatino", "Georgia", "Times New Roman", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    max-width: 760px;
+    margin: 3rem auto;
+    padding: 0 1.25rem;
+  }
+  h1 { color: var(--heading); font-size: 2rem; margin-bottom: 0.25rem; }
+  h2 { color: var(--heading); font-size: 1.35rem; margin: 2rem 0 0.5rem; }
+  p { margin-bottom: 0.9rem; }
+  .subtitle { color: var(--text); opacity: 0.6; font-size: 0.95rem; margin-bottom: 2rem; }
+  code {
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 1rem 1.2rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+    font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .callout {
+    background: #e8f4f0;
+    border-left: 4px solid var(--heading);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.2rem;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout strong { color: var(--heading); }
+  .quiz {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin: 1.5rem 0;
+  }
+  .quiz h3 { color: var(--accent); margin-bottom: 0.6rem; }
+  .quiz label {
+    display: block;
+    cursor: pointer;
+    padding: 0.45rem 0.8rem;
+    margin: 0.2rem 0;
+    border-radius: 4px;
+    border: 1px solid transparent;
+  }
+  .quiz label:hover { background: var(--code-bg); }
+  .quiz input[type="radio"] { margin-right: 0.5rem; }
+  .quiz .correct {
+    background: #e6f7e6 !important;
+    border-color: #4caf50 !important;
+  }
+  .quiz .wrong {
+    background: #fde8e8 !important;
+    border-color: var(--danger) !important;
+  }
+  .quiz .feedback { margin-top: 0.7rem; font-style: italic; }
+  .sandbox {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow: hidden;
+  }
+  .sandbox-header {
+    background: var(--code-bg);
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border);
+  }
+  .sandbox canvas {
+    display: block;
+    border-bottom: 1px solid var(--border);
+  }
+  .sandbox button {
+    display: inline-block;
+    padding: 0.55rem 1.25rem;
+    margin: 0.5rem 0.25rem 0.5rem 1rem;
+    border: 2px solid var(--accent);
+    background: white;
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .sandbox button:hover { background: var(--accent); color: white; }
+  .sandbox button.primary {
+    background: var(--accent);
+    color: white;
+  }
+  .sandbox button.primary:hover { opacity: 0.85; }
+  .try {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin: 1.5rem 0;
+    border: 1px dashed var(--border);
+  }
+  .try h3 { color: var(--heading); margin-bottom: 0.5rem; }
+  .try ul { margin-left: 1.2rem; }
+  .try li { margin-bottom: 0.4rem; }
+  nav { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  nav a { color: var(--accent); }
+  .warning {
+    background: #fdf0e0;
+    border-left: 4px solid #b58900;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.2rem;
+    border-radius: 0 6px 6px 0;
+  }
+  .sandbox .arrow-hint {
+    text-align: center;
+    padding: 0.3rem;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    border-top: 1px solid #eee;
+  }
+</style>
+</head>
+<body>
+
+<h1>Lesson 3: User Input &amp; Flapping</h1>
+<p class="subtitle">Now you control the bird.</p>
+
+<h2>Listening for a key press</h2>
+<p>
+  The browser fires an <strong>event</strong> every time the user presses a key.
+  We can "listen" for that event and run our own code when it happens.
+  The event is called <code>keydown</code>.
+</p>
+
+<pre>document.addEventListener('keydown', function(event) {
+  if (event.code === 'Space') {
+    birdVelocity = -7;   // push the bird upward
+  }
+});</pre>
+
+<p>Let's unpack this:</p>
+<ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+  <li><code>addEventListener('keydown', ...)</code> -- "browser, tell me when any key is pressed"</li>
+  <li>The second argument is a <strong>function</strong> -- a block of code that runs when the event fires</li>
+  <li><code>event.code</code> tells us which key was pressed (<code>'Space'</code>, <code>'ArrowUp'</code>, etc.)</li>
+  <li>We set <code>birdVelocity = -7</code> -- a negative velocity means the bird moves <strong>upward</strong></li>
+</ul>
+
+<div class="callout">
+  <strong>Why <code>-7</code>?</strong> The sign controls direction: negative = up, positive = down.
+  The number controls <em>how hard</em> the flap is. 7 pixels per frame feels responsive.
+  Gravity (0.4 per frame) will eventually pull the bird back down.
+</div>
+
+<h2>Putting it together</h2>
+
+<pre>let birdY = 300;
+let birdVelocity = 0;
+const gravity = 0.4;
+const flapStrength = -7;
+
+function update() {
+  birdVelocity += gravity;
+  birdY += birdVelocity;
+  requestAnimationFrame(update);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#a8d8ea';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#f1c40f';
+  ctx.fillRect(180, birdY, 40, 40);
+
+  requestAnimationFrame(draw);
+}
+
+document.addEventListener('keydown', function(event) {
+  if (event.code === 'Space') {
+    birdVelocity = flapStrength;   // shoot upward!
+  }
+});
+
+requestAnimationFrame(update);
+requestAnimationFrame(draw);</pre>
+
+<div class="warning">
+  <strong>Why <code>birdVelocity = flapStrength</code> and not <code>birdVelocity += flapStrength</code>?</strong>
+  Setting the velocity <em>directly</em> (with <code>=</code>) gives a consistent, snappy flap every time
+  regardless of how fast the bird was already falling. Using <code>+=</code> would make flapping feel
+  inconsistent -- sometimes strong, sometimes weak.
+</div>
+
+<h2>Preventing the space bar from scrolling the page</h2>
+<p>
+  There's one annoying problem: pressing Space normally scrolls the page down.
+  We need to tell the browser "we handled it, don't do the default thing."
+</p>
+
+<pre>document.addEventListener('keydown', function(event) {
+  if (event.code === 'Space') {
+    event.preventDefault();          // stop the page from scrolling
+    birdVelocity = flapStrength;
+  }
+});</pre>
+
+<p>
+  <code>event.preventDefault()</code> cancels the browser's default behavior for that key.
+  Without it, your game and the page scroll at the same time -- very frustrating!
+</p>
+
+<h2>Live sandbox: flap to keep the bird airborne</h2>
+
+<div class="sandbox">
+  <div class="sandbox-header">Press SPACE to flap. Don't hit the ground or fly off the top!</div>
+  <canvas id="sandbox-canvas" width="400" height="500"></canvas>
+  <div class="arrow-hint">↑ press SPACE to flap ↑</div>
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('sandbox-canvas');
+  const ctx = canvas.getContext('2d');
+
+  let birdY = 250;
+  let birdVelocity = 0;
+  const gravity = 0.4;
+  const flapStrength = -7;
+  let gameOver = false;
+
+  function update() {
+    if (gameOver) return;
+    birdVelocity += gravity;
+    birdY += birdVelocity;
+
+    if (birdY <= 0) {
+      birdY = 0;
+      birdVelocity = 0;
+    }
+    if (birdY >= canvas.height - 40) {
+      birdY = canvas.height - 40;
+      gameOver = true;
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#a8d8ea';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#8d6e63';
+    ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+
+    ctx.fillStyle = '#f1c40f';
+    ctx.fillRect(180, birdY, 40, 40);
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(205, birdY + 10, 8, 8);
+
+    if (gameOver) {
+      ctx.fillStyle = 'red';
+      ctx.font = '30px "Palatino", "Georgia", serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 20);
+      ctx.font = '14px "Palatino", "Georgia", serif';
+      ctx.fillText('Click here and press SPACE to retry', canvas.width / 2, canvas.height / 2 + 20);
+    }
+
+    if (!gameOver) requestAnimationFrame(draw);
+  }
+
+  canvas.tabIndex = 0;
+  canvas.focus();
+
+  canvas.addEventListener('keydown', function(event) {
+    if (event.code === 'Space') {
+      event.preventDefault();
+      if (gameOver) {
+        birdY = 250;
+        birdVelocity = 0;
+        gameOver = false;
+        update();
+        draw();
+      } else {
+        birdVelocity = flapStrength;
+      }
+    }
+  });
+
+  canvas.addEventListener('click', function() {
+    canvas.focus();
+    if (gameOver) {
+      birdY = 250;
+      birdVelocity = 0;
+      gameOver = false;
+      update();
+      draw();
+    }
+  });
+
+  function start() {
+    gameOver = false;
+    update();
+    draw();
+  }
+
+  start();
+})();
+</script>
+
+<h2>Quiz</h2>
+
+<div class="quiz" id="quiz1">
+  <h3>Q1: What does <code>addEventListener('keydown', ...)</code> do?</h3>
+  <label><input type="radio" name="q1" value="a" onchange="checkQ1()">
+    Registers a function to run whenever any key is pressed
+  </label>
+  <label><input type="radio" name="q1" value="b" onchange="checkQ1()">
+    Starts the game loop
+  </label>
+  <label><input type="radio" name="q1" value="c" onchange="checkQ1()">
+    Draws a keyboard onto the canvas
+  </label>
+  <p class="feedback" id="q1-feedback"></p>
+</div>
+
+<div class="quiz" id="quiz2">
+  <h3>Q2: Why set <code>birdVelocity = -7</code> instead of <code>birdVelocity = 7</code>?</h3>
+  <label><input type="radio" name="q2" value="a" onchange="checkQ2()">
+    Negative velocity moves upward on the canvas (remember: Y goes down)
+  </label>
+  <label><input type="radio" name="q2" value="b" onchange="checkQ2()">
+    It's a typo -- it should be positive
+  </label>
+  <label><input type="radio" name="q2" value="c" onchange="checkQ2()">
+    Negative numbers make the bird fly faster
+  </label>
+  <p class="feedback" id="q2-feedback"></p>
+</div>
+
+<div class="quiz" id="quiz3">
+  <h3>Q3: What happens if you forget <code>event.preventDefault()</code>?</h3>
+  <label><input type="radio" name="q3" value="a" onchange="checkQ3()">
+    The page scrolls down every time you press Space -- very annoying
+  </label>
+  <label><input type="radio" name="q3" value="b" onchange="checkQ3()">
+    The bird won't flap at all
+  </label>
+  <label><input type="radio" name="q3" value="c" onchange="checkQ3()">
+    The game crashes with an error
+  </label>
+  <p class="feedback" id="q3-feedback"></p>
+</div>
+
+<script>
+function highlight(q, correctValue) {
+  const name = q.id.replace('quiz', 'q');
+  const labels = q.querySelectorAll('label');
+  let answered = false;
+  labels.forEach(l => {
+    const input = l.querySelector('input');
+    if (input && input.checked && input.value !== '') answered = true;
+  });
+  if (!answered) return;
+
+  labels.forEach(l => {
+    l.classList.remove('correct', 'wrong');
+    const input = l.querySelector('input');
+    if (input && input.checked) {
+      if (input.value === correctValue) {
+        l.classList.add('correct');
+      } else {
+        l.classList.add('wrong');
+      }
+    }
+  });
+  const fb = document.getElementById(name + '-feedback');
+  const checked = q.querySelector('input:checked');
+  if (checked) {
+    fb.textContent = checked.value === correctValue
+      ? 'Correct!'
+      : 'Not quite. Go back and re-read the relevant section.';
+  }
+}
+
+function checkQ1() { highlight(document.getElementById('quiz1'), 'a'); }
+function checkQ2() { highlight(document.getElementById('quiz2'), 'a'); }
+function checkQ3() { highlight(document.getElementById('quiz3'), 'a'); }
+</script>
+
+<div class="try">
+  <h3>Try it yourself</h3>
+  <ul>
+    <li>Change <code>flapStrength</code> to <code>-3</code> -- the flaps feel weak and the bird barely stays up</li>
+    <li>Change <code>flapStrength</code> to <code>-12</code> -- each flap sends the bird rocketing upward</li>
+    <li>Change the event from <code>'Space'</code> to <code>'ArrowUp'</code> -- now the up arrow controls the bird</li>
+    <li>Add a second key listener for <code>'ArrowDown'</code> that pushes the bird <em>down</em> (set velocity to <code>5</code>)</li>
+  </ul>
+</div>
+
+<h2>Key takeaways</h2>
+<ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+  <li><code>addEventListener('keydown', fn)</code> lets you react to key presses</li>
+  <li><code>event.code</code> identifies which key was pressed</li>
+  <li>Setting velocity to a negative number makes the bird jump upward</li>
+  <li><code>event.preventDefault()</code> stops the browser's built-in key behavior</li>
+  <li>You now have all three ingredients: <strong>draw, update, input</strong> -- the complete game loop</li>
+</ul>
+
+<h2>Further reading</h2>
+<p>
+  <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event" target="_blank">MDN: keydown event</a>
+  and
+  <a href="https://eloquentjavascript.net/15_event.html" target="_blank">Eloquent JavaScript Chapter 15: Handling Events</a>
+  (first two sections on event listeners).
+</p>
+
+<nav>
+  <a href="./0002-the-game-loop.html">← Lesson 2: The Game Loop</a>
+  &nbsp;|&nbsp;
+  <a href="./0004-pipes-and-scrolling.html">Next lesson: Pipes &amp; Scrolling →</a>
+</nav>
+
+<p style="margin-top: 2rem; font-size: 0.85rem; opacity: 0.6;">
+  Got questions? Ask me anything that wasn't clear -- I'm your teacher.
+</p>
+
+</body>
+</html>
